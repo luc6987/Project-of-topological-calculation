@@ -1,6 +1,7 @@
 import random
 import numpy as np
-
+import matplotlib.pyplot as plt 
+from mpl_toolkits.mplot3d import Axes3D
 
 ## QUESTION 1:
 
@@ -17,6 +18,58 @@ class Sphere:
         """Check if the sphere contains the given point."""
         norme = np.linalg.norm(self.center - np.array(point))
         return not (np.isclose((norme),self.radius) or norme>self.radius+1e-9)
+    
+    def onbound(self,point):
+        """"check if the point is on the boundary of the sphere"""
+        norme = np.linalg.norm(self.center - np.array(point))
+        return np.isclose((norme),self.radius)
+    
+    def plot_3D(self):
+        x_center, y_center, z_center = self.center  # Center of the ball  # Radius of the ball
+        rayon = self.radius
+
+        u = np.linspace(0, 2 * np.pi, 100)  # Azimuthal angle
+        v = np.linspace(0, np.pi, 100)      # Polar angle
+        x = x_center + rayon * np.outer(np.cos(u), np.sin(v))
+        y = y_center + rayon * np.outer(np.sin(u), np.sin(v))
+        z = z_center + rayon * np.outer(np.ones_like(u), np.cos(v))
+
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(111, projection='3d')
+        ax.plot_surface(x, y, z, color='cyan', alpha=0.2, edgecolor='gray')
+
+        ax.scatter(x_center, y_center, z_center, color="red", label="Center", s=100)
+
+        ax.set_xlabel("X-axis")
+        ax.set_ylabel("Y-axis")
+        ax.set_zlabel("Z-axis")
+
+        # Set equal aspect ratio for all axes
+        ax.set_box_aspect([1, 1, 1])  # Aspect ratio is 1:1:1
+        plt.legend()
+      
+        plt.show()
+
+def circumcenter_mathias(points):
+    n=len(points)
+    if(n==0):
+        raise ValueError("no points")
+    d=len(points[0])
+
+    #insérer test vérifiant qu'ils ne sont pas dégénérés
+    A=[]
+    for i in range(1,n):
+        A.append([points[0][j]+points[i][j] for j in range(d)])
+    b=[]
+    for i in range(1,n):
+        b.append(np.sum([points[0][j]+points[i][j] for j in range(d)]))
+    
+    #on obtient le circumcentre: 
+    center = np.linalg.solve(A,b)
+    radius = np.linalg.norm(center-points[0])
+    return Sphere(center,radius)
+
+
 
 def make_sphere_two_points(p1, p2):
     """Create a sphere with two points on its boundary."""
@@ -26,6 +79,7 @@ def make_sphere_two_points(p1, p2):
 
 def make_sphere_three_points(p1, p2, p3):
     """Create a sphere with three points on its boundary."""
+    """ It calculates the circumcenter"""
     A = np.array(p1)
     B = np.array(p2)
     C = np.array(p3)
@@ -67,6 +121,7 @@ def make_sphere_four_points(p1, p2, p3, p4):
 
     Mz = np.copy(M)
     Mz[:, 3] = 1
+    
 
     Mdet = np.linalg.det(M[:, 1:])
     Mxdet = np.linalg.det(Mx[:, 1:])
@@ -79,6 +134,8 @@ def make_sphere_four_points(p1, p2, p3, p4):
     center = np.array([Mxdet, Mydet, Mzdet]) / (2 * Mdet)
     radius = np.linalg.norm(center - A)
     return Sphere(center, radius)
+
+
 
 def trivial(R):
     """Find the minimal sphere for 0, 1, 2, 3, or 4 points."""
@@ -259,7 +316,6 @@ def test_task3():
     P = [(5, 0, 1), (-1, -3, 4), (-1, -4, -3), (-1, 4, -3)]
     task3(P,1000)
 
-test_task3()
 
 def task4(points,emu):
     """"Reuse the LP-type algorithm with new parameters in order to determine
@@ -269,12 +325,32 @@ the framework."""
 
     """On part du principe que pour trouver le cercle le plus petit possible qui a ces points sur sa frontière,
     il suffit de calculer leur MEB (qui a nécessairement 2 points sur sa frontière) et de voir si le MEB a tous les points sur sa frontière"""
-    MEB = minimal_enclosing_sphere(emu)
+    
+    S = alpha_sphere(emu)
     for p in points:
-        if not MEB.onradius(p):
-            return False,None
-    return True, MEB.radius
-        
+        if S.contains(p) and (not S.onbound(p)):
+            return False,S.radius
+    return True, S.radius
+
+
+def alpha_sphere(points):
+    "calcule le cercle candidat à être le cercle minimal ayant tous les points sur sa frontière"
+    "il suffit en dimension 3 de 4 points au maximum. On reprend pour cela en grande partie la fonction trivial ci dessus"
+    R=points
+    if not points:
+        return Sphere([0, 0, 0], 0)
+    elif len(points) == 1:
+        return Sphere(R[0], 0)
+    elif len(points) == 2:
+        return make_sphere_two_points(R[0], R[1])
+    elif len(points) == 3:
+        return make_sphere_three_points(R[0], R[1], R[2])
+    elif len(points) >= 4:
+        R=points[0:4]
+        return make_sphere_four_points(R[0], R[1], R[2], R[3])
+
+
+
 
 
     

@@ -1,5 +1,7 @@
 import Tasks
 import numpy as np
+import random
+
 
 # Test cases
 def test_task1():
@@ -124,6 +126,20 @@ def test_task4():
     a=Tasks.task4(P1,P)
     print(f"Complex ? {a[0]} ; Radius: {a[1]}")
 
+def test_task5():
+ #generate random n points in R^d:
+ n=random.randint(5,10)
+ print(f"n={n}")
+ d=random.randint(2,5)
+ print(f"d={d}")
+ points=[tuple(np.random.rand(d)) for i in range(n)]
+ print(f"Points: {points}")
+ k=random.randint(2,d)
+ print(f"k={k}")
+ l=np.random.rand(1)
+ print(f"l={l}")
+ Tasks.task5(points,k,l)
+
 
 
 
@@ -135,7 +151,9 @@ test_task2()
 print("---------Question 3------------")
 test_task3()
 print("fonction mathias:")
-test_task3_mathias()
+#test_task3_mathias()
 print("---------Question 4------------")
 test_task4()
+print("---------Question 5------------")
+test_task5()
 

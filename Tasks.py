@@ -204,6 +204,9 @@ def Is_in_alpha_complex(P,R):
     for p in P:
        if MEB.contains(p):
            return False
+       #je rajoute cette condition au cas où, à enlever si fait bugger
+       if np.linalg.norm(p-MEB.center)>MEB.radius+1e-9:
+           print("erreur de MEB")
 
     return True
 
@@ -227,6 +230,7 @@ def task5(points,K,l):
 merates the simplexes of dimension at most k and filtration value at most l of
 the α-complex and their filtration values.""" 
       enum = enum3(points)
+      #ca me parait très lourd de print enum
       print(f"enum={enum}")
       filtration_value=0
       IsSimplex = {tuple([i]): 1 for i in range(len(points))}
@@ -254,6 +258,7 @@ the α-complex and their filtration values."""
 
                   new_simplex = [points[idx] for idx in current_simplex] + [points[k]]
 
+                  #ici, on utilise trivial et pas make_sphere... ? 
                   MEB = trivial(new_simplex)
 
                   if MEB.radius < l:
@@ -407,15 +412,17 @@ def test_task5():
  print(f"l={l}")
  task5(points,k,l)
 
-#print("---------Question 1------------")
-#test_task1()
-#print("---------Question 2------------")
-#test_task2()
-#print("---------Question 3------------")
-#test_task3()
-#print("fonction mathias:")
-#test_task3_mathias()
-#print("---------Question 4------------")
-#test_task4()
-#print("---------Question 5------------")
-test_task5()    
+ if __name__ == "__main__":
+
+    #print("---------Question 1------------")
+    #test_task1()
+    #print("---------Question 2------------")
+    #test_task2()
+    #print("---------Question 3------------")
+    #test_task3()
+    #print("fonction mathias:")
+    #test_task3_mathias()
+    #print("---------Question 4------------")
+    #test_task4()
+    #print("---------Question 5------------")
+    test_task5()    

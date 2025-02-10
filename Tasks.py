@@ -423,6 +423,6 @@ def test_task5():
     #print("fonction mathias:")
     #test_task3_mathias()
     #print("---------Question 4------------")
-    #test_task4()
+    test_task4()
     #print("---------Question 5------------")
-    test_task5()    
+    #test_task5()    

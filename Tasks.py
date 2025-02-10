@@ -9,34 +9,58 @@ class Sphere:
         self.center = np.array(center)
         self.radius = radius
 
-    def contains(self, point):
-        """Check if the sphere contains the given point."""
-        return np.linalg.norm(self.center - np.array(point)) <= self.radius #+ 1e-9
     
-    def contains_strict(self,point):
-        """Check if the sphere contains the given point."""
+
+
+    def contains(self, point, tol=1e-9):
+        """Check if the sphere contains the given point with tolerance for float imprecision."""
+        return np.linalg.norm(self.center - np.array(point)) <= self.radius + tol
+
+    def contains_strict(self, point, tol=1e-9):
+        """Check if the sphere strictly contains the given point with tolerance for float imprecision."""
         norme = np.linalg.norm(self.center - np.array(point))
-        return not (np.isclose((norme),self.radius) or norme>self.radius+1e-9)
+        return not (np.isclose(norme, self.radius, atol=tol) or norme > self.radius + tol)
+    
     
     def onradius(self,point):
         """Check if the point is on the sphere"""
         return np.isclose(np.linalg.norm(self.center - np.array(point)),self.radius)
+    
+
+#################################################################### TASK 1 ####################################################################
+
 
 def make_sphere_n_points(points):
     """
-    Trouver le minimal circumcircle dans l'espace d-dimension de n points (n <= d+1).
+     Finds the minimal circumcircle in the d-dimensional space for n points (n <= d+1).
     
-    when utilising this mathod, we assume that the points are not colinear and that the dimension is at least 2.
+    When utilising this method, we assume that the points are not colinear and that the dimension is at least 2.
 
-    Paramètres :
+    Params :
         points: np.ndarray, shape (n, d)
-    Retourne :
+    Returns :
         Sphere
     """
-    points = np.array(points, dtype=float)
+
+    nppoints = np.array(points, dtype=float)
+
+    if len(points) > nppoints.shape[1] + 1:
+        raise ValueError("Number of points must be less than or equal to the dimension of the space plus one.")
+
+    if len(points) == 0:
+        print("No points given in circumcircle calculation")
+        raise None;
+    if len(points) == 1:
+        return Sphere(center=points[0], radius=0) 
+    if len(points) == 2:
+        return Sphere(center=(nppoints[0]+nppoints[1])/2, radius=np.linalg.norm(nppoints[0]-nppoints[1])/2)
     
+    #print("nppoints shape:", nppoints.shape)
+
     # Calcul de la matrice A et du vecteur b
-    diffs = points[1:] - points[0]  # Différences (P^n - P^0) pour n = 1, ..., N-1
+    diffs = nppoints[1:] - nppoints[0]  # Différences (P^n - P^0) pour n = 1, ..., N-1
+    #print("diffs shape:", diffs.shape)
+
     A = 2 * np.dot(diffs, diffs.T)  # Matrice A
     b = np.sum(diffs ** 2, axis=1)  # Vecteur b
 
@@ -44,10 +68,10 @@ def make_sphere_n_points(points):
     k = np.linalg.solve(A, b)
 
     # Calculer le centre
-    center = points[0] + np.dot(k, diffs)
+    center = nppoints[0] + np.dot(k, diffs)
 
     # Calculer le rayon
-    radius = np.linalg.norm(center - points[0])
+    radius = np.linalg.norm(center - nppoints[0])
 
     # Retourner une instance de Sphere
     return Sphere(center=center, radius=radius)
@@ -63,7 +87,7 @@ def trivial(R):
 
 def welzl(P, R):
     """Recursive implementation of Welzl's algorithm for 3D."""
-    if not P or len(R) == 4:
+    if not P or len(R) == len(P[0])+   1 :
         return trivial(R)
 
     p = P.pop(random.randint(0, len(P) - 1))
@@ -87,6 +111,10 @@ def minimal_enclosing_sphere(points):
 
 #Ici, on déduit que la filtration value de chaque simplexe est le MEB (à vérifier)
 
+#################################################################### TASK 2 ####################################################################
+
+
+
 def task2(points,emu):
     """Compute the filtration value for the points in emu"""
     points_chosen = [points[i] for i in emu]
@@ -94,26 +122,12 @@ def task2(points,emu):
 
     return filtration
 
-def enum_simplex2(points):
-    "énumère et affiche les simplexes avec la valeur de filtrage"
-    parties= [] #on fait la liste des sous ensembles de points:
 
-    i, imax = 0, 2**len(points)-1 #on construit un itérateur i, dont les bits 1 seront les points sélectionnés dans le sous ensemble
-    while i <= imax:
-        s = []
-        j, jmax = 0, len(points)-1
-        while j <= jmax:
-            if (i>>j)&1 == 1:
-                s.append(points[j])
-            j += 1
-        parties.append(s)
-        i += 1 
 
-    #on affiche les simplexes avec filtration value
+#################################################################### TASK 3 ####################################################################
 
-    for enum in parties:
-        filtration = task2(points,enum)
-        print(f"({enum}) -> {filtration}")
+
+
     
 def enum3(points):
     """
@@ -122,41 +136,9 @@ def enum3(points):
     n = len(points)
     return [[list(comb) for comb in combinations(range(n), k)] for k in range(1, n + 1)]
   
-def task3_mathias(points,l):
-    """implement an algorithm that enumerates the simplexes and their filtration values."""
+ 
 
-    emu = enum3(points)
-    simplex = {tuple([i]): 0 for i in range(len(points))} #on initialise le premier simplexe
-    #IsSimplex = {0:True} #dictionnaire indiquant si un sous ensemble forme un simplexe
-    IsSimplex= [[0] * len(sublist) for sublist in emu] # le tableau de suivi: 0 si jamais vu, 1 si simplexe, 2 si pas un simplexe
-
-    n=len(points)
-
-
-    #Vestion 1 Mathias: pas optimale, on évite pas tj de calculer les simplexes qui en contiennent d'autres
-    for i in range(1,len(emu)):
-        for j in range(len(emu[i])):
-            test = IsSimplex[i][j]
-            if(test==0): #pas encore connu
-                filtration = task2(points,emu[i][j])
-                if (filtration > l): #pas un simplexe
-                    IsSimplex[i][j] = 2
-                    if(i<n-1): #on s'assure qu'on est pas à la dernière ligne
-                        for k in range(n-i-1-j):
-                         IsSimplex[i+1][j+k]=2 #les sous ensembles de taille supérieure qui contiennent emu[i,j] ne sont pas non plus des simplexes
-                else:
-                    IsSimplex[i][j] = 1
-                    simplex[tuple(emu[i][j])]=filtration
-            elif(test==1): #est un simplexe -> normalement impossible de revenir sur nos pas !
-                raise RecursionError("l'ago revient sur ses pas !")
-            #Sinon, test ==2 et ce n'est pas un simplexe. on passe au prochain. Pas besoin de tester cette éventualité
-    
-    for key, value in simplex.items():
-        print(f"{key} -> {value}")
-    
-    return simplex   
-
-def task3(points,l):
+def task3(points,l, printit=False):
     enum = enum3(points)
     IsSimplex = {tuple([i]): 1 for i in range(len(points))}
 
@@ -188,42 +170,58 @@ def task3(points,l):
                 else:
                     IsSimplex[pn] = 0
 
-    for key, value in simplex.items():
-        print(f"{key} -> {value.radius}")
+    if printit:
+        for key, value in simplex.items():
+            print(f"{key} -> {value.radius}")
+    return simplex
+
+
+
+
+#################################################################### TASK 4 ####################################################################
+
 
 def Is_in_alpha_complex(P,R):
-    """Check if the simplex R is in the alpha complex P"""
+    """Check if the simplex R is in the alpha complex of P"""
+    d = len(P[0])
+
+    #On se borne aux d+1 premiers points qui suffisent à déterminer la sphère.
+    d = len(P[0])
+    if len(R) > d+1:
+        R_used = R[:d+1]
+    else:
+        R_used = R
+
+    circum=make_sphere_n_points(R_used)
     
-    #On suppose que le simplex est un simplexe
-    if not R or len(R)<=len(P[0])+1  :
-        return True
-
-    MEB=make_sphere_n_points(R)
-
-    #vérifier si il ne faut pas changer la fonction contains
     for p in P:
-       if MEB.contains(p):
-           return False
-       #je rajoute cette condition au cas où, à enlever si fait bugger
-       if np.linalg.norm(p-MEB.center)>MEB.radius+1e-9:
-           print("erreur de MEB")
+       if circum.contains_strict(p):
+           return False, circum
 
-    return True
+    return True, circum
 
 def filtration_value(R):
     """Compute the filtration value of the simplex R"""
-    return make_sphere_n_points(R).radius
+    return make_sphere_n_points(R)
 
 def task4(points,R):
     """"Reuse the LP-type algorithm with new parameters in order to determine
 if a simplex is in the α-complex and its filtration value. Note that this is less
 standard than for the MEB, you need to explain how this new problem fits in
 the framework."""
+    result, circum= Is_in_alpha_complex(points,R)
+    if result:
+        print(f"Simplex {R} is in the alpha complex")
+        return True, circum
+    else:
+        print(f"Simplex {R} is not in the alpha complex")
+        return False, circum
 
-    """On part du principe que pour trouver le cercle le plus petit possible qui a ces points sur sa frontière,
-    il suffit de calculer leur MEB (qui a nécessairement 2 points sur sa frontière) et de voir si le MEB a tous les points sur sa frontière"""
-    
-    return Is_in_alpha_complex(points,R),filtration_value(R)
+
+
+
+
+#################################################################### TASK 5 ####################################################################
 
 def task5(points,K,l):
       """ Given a set P of n points in Rd, implement an algorithm that enu-
@@ -398,31 +396,53 @@ def test_task4():
     print(f"Complex ? {a[0]}")
     print(f"filtration value: {a[1]}")
 
-def test_task5():
- #generate random n points in R^d:
- n=random.randint(5,10)
- print(f"n={n}")
- d=random.randint(2,5)
- print(f"d={d}")
- points=[tuple(np.random.rand(d)) for i in range(n)]
- print(f"Points: {points}")
- k=random.randint(2,d)
- print(f"k={k}")
- l=np.random.rand(1)
- print(f"l={l}")
- task5(points,k,l)
+def task5(points,K,l):
+      """ Given a set P of n points in Rd, implement an algorithm that enu-
+      merates the simplexes of dimension at most k and filtration value at most l of
+      the α-complex and their filtration values.""" 
+      enum = enum3(points)
+      print(f"enum={enum}")
+      filtration_value=0
+      IsSimplex = {tuple([i]): 1 for i in range(len(points))}
 
- if __name__ == "__main__":
+      simplex = {tuple([i]): Sphere(points[i], 0) for i in range(len(points))} #on initialise le premier simplexe
 
-    #print("---------Question 1------------")
-    #test_task1()
-    #print("---------Question 2------------")
-    #test_task2()
-    #print("---------Question 3------------")
-    #test_task3()
-    #print("fonction mathias:")
-    #test_task3_mathias()
-    #print("---------Question 4------------")
-    test_task4()
-    #print("---------Question 5------------")
-    #test_task5()    
+      for i in range(1,K):
+        for j in range(len(enum[i-1])):
+              
+          current_simplex = enum[i][j]
+
+          for k in range(len(points)):
+                  
+            if k in current_simplex:
+              break
+                        
+            pn = current_simplex.append(k)
+
+            is_alpha, circum = Is_in_alpha_complex(points,[points[idx] for idx in current_simplex])
+
+            if not is_alpha:
+              IsSimplex[pn] = 0
+              break
+
+            if pn in simplex:
+              break
+
+            new_simplex = [points[idx] for idx in current_simplex] + [points[k]]
+
+            MEB = trivial(new_simplex)
+
+            if MEB.radius < l:
+              if MEB.radius > filtration_value:
+                        filtration_value=MEB.radius
+              simplex[pn] = MEB
+              IsSimplex[pn] = 1
+            else:
+              IsSimplex[pn] = 0
+              break
+
+            print(f"new alpha-simplex: {pn} -> {MEB.radius} ")
+      print(f"filtration value: {filtration_value}")
+      return None
+
+

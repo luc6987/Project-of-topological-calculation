@@ -157,6 +157,8 @@ import os
 import sys
 import numpy as np
 import argparse
+from scipy.spatial import distance_matrix
+from itertools import combinations
 
 #On se propose ici d'utiliser la bibliotheque sc.py pour ploter les complexes simpliciaux
 
@@ -184,6 +186,44 @@ def test_plot_complexes():
         #display(Image(filename="complex_plot/plot.png"))
 
 
+def plot_cech_complex(points, radius):
+    """Plot the Cech complex for given points and radius."""
+
+    points = np.array(points)
+    dist_matrix = distance_matrix(points, points)
+    
+    fig, ax = plt.subplots()
+    ax.scatter(points[:, 0], points[:, 1], label='Points')
+    
+    # Plot edges
+    for i, j in combinations(range(len(points)), 2):
+        if dist_matrix[i, j] <= 2 * radius:
+            ax.plot([points[i, 0], points[j, 0]], [points[i, 1], points[j, 1]], 'b-')
+    
+    # Plot triangles
+    for i, j, k in combinations(range(len(points)), 3):
+        if (dist_matrix[i, j] <= 2 * radius and dist_matrix[i, k] <= 2 * radius and dist_matrix[j, k] <= 2 * radius):
+            tri = plt.Polygon([points[i], points[j], points[k]], alpha=0.3, color='g')
+            ax.add_patch(tri)
+    
+    ax.set_title('Cech Complex')
+    ax.set_aspect('equal', 'box')
+    plt.show()
+
+def test_plot_cech_complex_2d():
+    points = [
+        (0, 0), (1, 0), (0, 1), (1, 1), (0.5, 0.5),
+        (2, 0), (2, 1), (3, 0), (3, 1), (2.5, 0.5)
+    ]
+    radius = 0.5
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    plot_cech_complex(points, radius)
+    plt.close(fig)
+
+
+
 
 
 
@@ -194,7 +234,8 @@ def test_plot_complexes():
 
 if __name__ == "__main__":
     #test_and_plot_minimal_enclosing_sphere_2D()
-    test_and_plot_minimal_enclosing_sphere_3d()
+    #test_and_plot_minimal_enclosing_sphere_3d()
     #test_circumsphere()
     #test_task4_plots()
     #test_plot_complexes()
+    test_plot_cech_complex_2d()

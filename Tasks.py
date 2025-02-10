@@ -76,28 +76,29 @@ def make_sphere_n_points(points):
     # Retourner une instance de Sphere
     return Sphere(center=center, radius=radius)
     
-def trivial(R):
+def trivial(R,d=3):
     """Find the minimal sphere for 0, 1 or mores points."""
     if not R:
-        return Sphere([0, 0, 0], 0)
+        return Sphere([0 for i in range(d)], 0)
     elif len(R) == 1:
         return Sphere(R[0], 0)
     elif len(R) >= 1:
         return make_sphere_n_points(R)
 
-def welzl(P, R):
+def welzl(P, R, d):
     """Recursive implementation of Welzl's algorithm for 3D."""
+
     if not P or len(R) == len(P[0])+   1 :
-        return trivial(R)
+        return trivial(R,d)
 
     p = P.pop(random.randint(0, len(P) - 1))
-    D = welzl(P, R)
+    D = welzl(P, R,d)
 
     if D.contains(p):
         P.append(p)
         return D
 
-    result = welzl(P, R + [p])
+    result = welzl(P, R + [p],d)
     P.append(p)
     return result
 
@@ -105,7 +106,8 @@ def minimal_enclosing_sphere(points):
     """Compute the minimal enclosing sphere for a set of points."""
     points = points[:]
     random.shuffle(points)
-    return welzl(points, [])
+    d=len(points[0])
+    return welzl(points, [],d)
    
 ## Question 2:
 

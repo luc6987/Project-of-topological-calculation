@@ -126,6 +126,65 @@ def test_task5():
     task5(points,k,l)
 
 
+def test_4d_task2():
+    P = [(5, 0, 1, 0), (-1, -3, 4, 0), (-1, -4, -3, 0), (-1, 4, -3, 0)]
+
+    test_cases = [
+        ([0], 0),
+        ([1], 0),
+        ([2], 0),
+        ([3], 0),
+        ([2, 1], 3.53553),
+        ([1, 0], 3.67425),
+        ([3, 2], 4),
+        ([2, 0], 4.12311),
+        ([3, 0], 4.12311),
+        ([2, 1, 0], 4.39525),
+        ([3, 2, 0], 4.71495),
+        ([3, 1], 4.94975),
+        ([3, 2, 1], 5),
+        ([3, 1, 0], 5.04975),
+        ([3, 2, 1, 0], 5.09902),
+    ]
+
+    for enu, expected in test_cases:
+        assert np.allclose(task2(P, enu), expected), f"Test({enu}) failed!"
+        print(f"Test({enu}) passed!")
+
+def test_4D_circum():
+    P = [(5, 0, 1, 0), (-1, -3, 4, 0), (-1, -4, -3, 0), (-1, 4, -3, 0),(0,0,0,19)]
+    sphere = make_sphere_n_points(P)
+    print(f"Center: {sphere.center}")
+    print(f"Radius: {sphere.radius}")
+    for point in P:
+        if sphere.contains(point):
+            if sphere.onradius(point):
+                print(f"Point {point} is on the sphere")
+            else:
+                print(f"Point {point} is inside the sphere")
+        else:
+            print(f"Point {point} is outside the sphere")
+
+def test_4D_MEB():
+    P = [(5, 0, 1, 0), (-1, -3, 4, 0), (-1, -4, -3, 0), (-1, 4, -3, 0), (0, 0, 0, 19),
+         (2, 2, 2, 2), (-2, -2, -2, -2), (3, 3, 3, 3), (-3, -3, -3, -3), (4, 4, 4, 4),
+         (-4, -4, -4, -4), (1, 1, 1, 1), (-1, -1, -1, -1), (6, 6, 6, 6), (-6, -6, -6, -6),
+         (7, 7, 7, 7), (-7, -7, -7, -7), (8, 8, 8, 8), (-8, -8, -8, -8), (9, 9, 9, 9),
+         (-9, -9, -9, -9), (10, 10, 10, 10), (-10, -10, -10, -10)]
+    sphere = minimal_enclosing_sphere(P)
+    print(f"Center: {sphere.center}")
+    print(f"Radius: {sphere.radius}")
+    for point in P:
+        if sphere.contains(point):
+            if sphere.onradius(point):
+                print(f"Point {point} is on the sphere")
+            else:
+                print(f"Point {point} is inside the sphere")
+        else:
+            print(f"Point {point} is outside the sphere")
+
+
+
 
 
 
@@ -142,4 +201,9 @@ if __name__ == "__main__":
     test_task4()
     print("---------Question 5------------")
     #test_task5()
+
+
+    print("---------Robustness checks------------")
+    #test_4d_task2()
+    test_4D_MEB()
 

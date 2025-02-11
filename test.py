@@ -69,7 +69,7 @@ def test_task2():
 
         
 def test_task3():
-    P = [(5, 0, 1), (-1, -3, 4), (-1, -4, -3), (-1, 4, -3)]
+    P = [(5, 0, 1), (-1, -3, 4), (-1, -4, -3), (-1, 4, -3), (8,8,9),(1,4,1),(5,10,-10)]
     for i in [0,4,5,100]:
         print(f"-------------------filtration={i}-------------------")
         task3(P, i, printit = True)
@@ -198,12 +198,12 @@ if __name__ == "__main__":
     test_task3()
 
     print("---------Question 4------------")
-    test_task4()
+    #test_task4()
     print("---------Question 5------------")
     #test_task5()
 
 
     print("---------Robustness checks------------")
     #test_4d_task2()
-    test_4D_MEB()
+    #test_4D_MEB()
 

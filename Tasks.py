@@ -131,17 +131,18 @@ def task2(points,emu):
 
 
     
-def enum3(points):
+def enum3(points,d):
     """
-    Génère un tableau où chaque ligne correspond aux sous-ensembles d'une certaine taille.
+    Génère un tableau où chaque ligne correspond aux sous-ensembles d'une certaine taille
     """
     n = len(points)
-    return [[list(comb) for comb in combinations(range(n), k)] for k in range(1, n + 1)]
+    return [[list(comb) for comb in combinations(range(n), k)] for k in range(1, d + 2)]
   
  
 
 def task3(points,l, printit=False):
-    enum = enum3(points)
+    d=len(points[0])
+    enum = enum3(points,d)
     IsSimplex = {tuple([i]): 1 for i in range(len(points))}
 
     simplex = {tuple([i]): Sphere(points[i], 0) for i in range(len(points))} #on initialise le premier simplexe

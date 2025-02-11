@@ -186,41 +186,69 @@ def test_plot_complexes():
         #display(Image(filename="complex_plot/plot.png"))
 
 
-def plot_cech_complex(points, radius):
-    """Plot the Cech complex for given points and radius."""
+def plot_cech_complex(simplex, points, radius):
+    """Représente les simplexes et les points dans le plan."""
+
+    #prendre une copie du dictionnaire simplex:
+    simplex_copy = simplex.copy()
 
     points = np.array(points)
-    dist_matrix = distance_matrix(points, points)
     
     fig, ax = plt.subplots()
     ax.scatter(points[:, 0], points[:, 1], label='Points')
-    
-    # Plot edges
-    for i, j in combinations(range(len(points)), 2):
-        if dist_matrix[i, j] <= 2 * radius:
+     # Draw circles around each point
+    for point in points:
+        circle = plt.Circle(point, radius, color='skyblue', alpha=0.3)
+        ax.add_patch(circle)
+        
+
+
+    combin = None
+
+    while True:
+        if not simplex_copy:
+            break
+        
+        combin, s = simplex_copy.popitem()
+        if combin == None or len(combin) > 3:
+            print("invalid combin value")
+            break
+
+        # Plot vertexes
+        if len(combin) == 1:
+            i = combin[0]
+            ax.plot(points[i][0], points[i][1], 'ro')
+
+        # Plot edges
+        if len(combin) == 2:
+            if len(combin) > 2:
+                break
+            i, j = combin
             ax.plot([points[i, 0], points[j, 0]], [points[i, 1], points[j, 1]], 'b-')
-    
-    # Plot triangles
-    for i, j, k in combinations(range(len(points)), 3):
-        if (dist_matrix[i, j] <= 2 * radius and dist_matrix[i, k] <= 2 * radius and dist_matrix[j, k] <= 2 * radius):
-            tri = plt.Polygon([points[i], points[j], points[k]], alpha=0.3, color='g')
+
+        # Plot triangles
+        if len(combin) == 3:
+            i, j, k = combin
+            triang = np.array([points[i], points[j], points[k]])
+            tri = plt.Polygon(triang, alpha=0.3, color='g')
             ax.add_patch(tri)
-    
+
     ax.set_title('Cech Complex')
     ax.set_aspect('equal', 'box')
     plt.show()
 
-def test_plot_cech_complex_2d():
-    points = [
-        (0, 0), (1, 0), (0, 1), (1, 1), (0.5, 0.5),
-        (2, 0), (2, 1), (3, 0), (3, 1), (2.5, 0.5)
-    ]
-    radius = 0.5
+   
 
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    plot_cech_complex(points, radius)
-    plt.close(fig)
+def test_plot_cech_complex_2d():
+    points = [(np.random.randint(-10, 10), np.random.randint(-10, 10)) for _ in range(15)]
+
+        
+    
+    #radius = 0.5
+    l=3
+
+    simplex = task3(points, l, printit=True)
+    plot_cech_complex(simplex, points,l)
 
 
 

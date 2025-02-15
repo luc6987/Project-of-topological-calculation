@@ -1,6 +1,8 @@
 import random
 import numpy as np
 from itertools import combinations
+import time
+from concurrent.futures import ThreadPoolExecutor
 
 ## QUESTION 1:
 
@@ -140,38 +142,32 @@ def enum3(points,d):
   
  
 
-def task3(points,l, printit=False):
-    d=len(points[0])
-    enum = enum3(points,d)
-    IsSimplex = {tuple([i]): 1 for i in range(len(points))}
-
-    simplex = {tuple([i]): Sphere(points[i], 0) for i in range(len(points))} #on initialise le premier simplexe
-
+def task3(points, l, printit=False):
+    #input: points: list of tuples, the points in Rd
+    # l: float, the maximal radius of the sphere
+    # printit: bool, print the result or not
     
-    for i in range(1,len(enum)):
-        for j in range(len(enum[i-1])):
-            current_simplex = enum[i-1][j]
+    #output: simplex: dict, the simplexes of dimension at most d and filtration value at most l
 
+    d = len(points[0])
+    enum = enum3(points, d)
+    simplex = {tuple([i]): Sphere(points[i], 0) for i in range(len(points))}
+
+    for i in range(1, len(enum)):
+        for current_simplex in enum[i - 1]:
             for k in range(len(points)):
-
-                pn =tuple(current_simplex + [k])
-
                 if k in current_simplex:
-                    IsSimplex[pn] = 0
-                    break
+                    continue
 
+                pn = tuple(current_simplex + [k])
                 if pn in simplex:
-                    break
+                    continue
 
                 new_points = [points[idx] for idx in current_simplex] + [points[k]]
-
                 MEB = minimal_enclosing_sphere(new_points)
 
                 if MEB.radius < l:
                     simplex[pn] = MEB
-                    IsSimplex[pn] = 1
-                else:
-                    IsSimplex[pn] = 0
 
     if printit:
         for key, value in simplex.items():
@@ -226,228 +222,61 @@ the framework."""
 
 #################################################################### TASK 5 ####################################################################
 
-def task5(points,K,l):
-      """ Given a set P of n points in Rd, implement an algorithm that enu-
-merates the simplexes of dimension at most k and filtration value at most l of
-the α-complex and their filtration values.""" 
-      enum = enum3(points)
-      #ca me parait très lourd de print enum
-      #print(f"enum={enum}")
-      filtration_value=0
-      IsSimplex = {tuple([i]): 1 for i in range(len(points))}
+def enum5(points):
+    """
+    Génère un tableau où chaque ligne correspond aux sous-ensembles d'une certaine taille
+    """
+    n = len(points)
+    return [[list(comb) for comb in combinations(range(n), k)] for k in range(2, len(points[0]) + 2)]
+  
 
-      simplex = {tuple([i]): Sphere(points[i], 0) for i in range(len(points))} #on initialise le premier simplexe
+def task5(points, K, l):
+    """ Given a set P of n points in Rd, implement an algorithm that enumerates the simplexes of dimension at most k and filtration value at most l of the α-complex and their filtration values.""" 
+    #input: points: list of tuples,the points in Rd
+    # K: int, the maximal dimension of the simplexes
+    # l: float, the maximal filtration value
 
-      for i in range(1,K):
-          for j in range(len(enum[i-1])):
-              
-              current_simplex = enum[i-1][j]
+    #output: simplex: dict, the simplexes of dimension at most k and filtration value at most l of the α-complex and their filtration values
+    # filtration_value: float, the maximal filtration value
+    # IsSimplex: dict, the simplexes of dimension at most k and filtration value at most l of the α-complex and their filtration values
+    
+    enum = enum5(points)
+    filtration_value = 0
+    IsSimplex = {}
+    simplex = {}  # on initialise le premier simplexe
 
-              for k in range(len(points)):
-                  
-                  if k in current_simplex:
-                      break
-                  
-                  pn =tuple(current_simplex + [k])
-
-                  if not Is_in_alpha_complex(points,pn):
-                    IsSimplex[pn] = 0
-                    break
-
-                  if pn in simplex:
-                    break
-
-                  new_simplex = [points[idx] for idx in current_simplex] + [points[k]]
-
-                  #ici, on utilise trivial et pas make_sphere... ? 
-                  MEB = trivial(new_simplex)
-
-                  if MEB.radius < l:
-                      if MEB.radius > filtration_value:
-                        filtration_value=MEB.radius
-                      simplex[pn] = MEB
-                      IsSimplex[pn] = 1
-                  else:
-                      IsSimplex[pn] = 0
-                      break
-
-                  print(f"new simplex: {pn} -> {MEB.radius} with filtration value {filtration_value}")
-
-# Test cases
-def test_task1():
-    """Test cases for minimal enclosing sphere."""
-    # Test 1: Single point
-    points = [(0, 0, 0)]
-    sphere = minimal_enclosing_sphere(points)
-    assert np.allclose(sphere.center, [0, 0, 0])
-    assert np.isclose(sphere.radius, 0)
-    print("Test 1.1 passed!")
-
-    # Test 2: Two points
-    points = [(0, 0, 0), (2, 0, 0)]
-    sphere = minimal_enclosing_sphere(points)
-    print(sphere.center)
-    assert np.allclose(sphere.center, [1, 0, 0])
-    assert np.isclose(sphere.radius, 1)
-    print("Test 1.2 passed!")
-
-    # Test 3: Three points
-    points = [(-10, 0, 0), (10, 0, 0), (0, 1, 0)]
-    sphere = minimal_enclosing_sphere(points)
-    assert np.allclose(sphere.center, [0, 0, 0])
-    assert np.isclose(sphere.radius, 10)
-    print("Test 1.3 passed!")
-
-    # Test 4: Four points
-    points = [(5, 0, 1), (-1, -3, 4), (-1, -4, -3), (-1, 4, -3)]
-    sphere =  minimal_enclosing_sphere(points)
-    assert np.allclose(sphere.center, [0, 0, 0])
-    assert np.isclose(sphere.radius, np.sqrt(26))
-    print("Test 1.4 passed!")
-
-    print("All test cases passed!")
-
-
-# Test cases
-def test_task2():
-        P = [(5, 0, 1), (-1, -3, 4), (-1, -4, -3), (-1, 4, -3)]
-
-        enu=[0]
-        assert np.allclose(task2(P,enu), 0)  
-        print(f"Test({enu})passed!")
-
-        enu=[1]
-        assert np.allclose( task2(P,enu), 0)  
-        print(f"Test({enu})passed!")
-
-        enu=[2]
-        assert np.allclose( task2(P,enu), 0)  
-        print(f"Test({enu})passed!")
-
-        enu=[3]
-        assert np.allclose( task2(P,enu), 0)
-        print(f"Test({enu})passed!")
-
-        enu=[2,1]
-        assert np.allclose( task2(P,enu), 3.53553)   
-        print(f"Test({enu})passed!")
-
-        enu=[1,0]
-        assert np.allclose( task2(P,enu), 3.67425)   
-        print(f"Test({enu})passed!")
-
-        enu=[3,2]
-        assert np.allclose( task2(P,enu), 4)   
-        print(f"Test({enu})passed!")
-
-        enu=[2,0]
-        assert np.allclose( task2(P,enu), 4.12311)   
-        print(f"Test({enu})passed!")
-
-        enu=[3,0]
-        assert np.allclose( task2(P,enu), 4.12311)   
-        print(f"Test({enu})passed!")
-
-        enu=[2,1,0]
-        assert np.allclose( task2(P,enu), 4.39525)   
-        print(f"Test({enu})passed!")
-
-        enu=[3,2,0]
-        assert np.allclose( task2(P,enu), 4.71495)   
-        print(f"Test({enu})passed!")
-
-        enu=[3,1]
-        assert np.allclose( task2(P,enu), 4.94975)   
-        print(f"Test({enu})passed!")
-
-        enu=[3,2,1]
-        assert np.allclose( task2(P,enu), 5)   
-        print(f"Test({enu})passed!")
-
-        enu=[3,1,0]
-        assert np.allclose( task2(P,enu), 5.04975)   
-        print(f"Test({enu})passed!")
-
-        enu=[3,2,1,0]
-        assert np.allclose( task2(P,enu), 5.09902)   
-        print(f"Test({enu})passed!")
-
-        print("Test 2 all passed! ")
-        
-def test_task3():
-    P = [(5, 0, 1), (-1, -3, 4), (-1, -4, -3), (-1, 4, -3)]
-    task3(P,1000)
-
-def test_task4():
-    P=[(0,5,0),(3,4,0),(-3,4,0)]
-    R=P
-    print(f"---- Test for {P}")
-    a= task4(P,R)
-    print(f"Complex ? {a[0]}")
-    print(f"filtration value: {a[1]}")
-
-    P.append((0,0,4))
-    R=P
-    print(f"---- Test for {P}")
-    a= task4(P,R)
-    print(f"Complex ? {a[0]}")
-    print(f"filtration value: {a[1]}")
-
-    P.append((0,0,-4))
-    print(f"---- Test for {P}")
-    a= task4(P,R)
-    print(f"Complex ? {a[0]}")
-    print(f"filtration value: {a[1]}")
-
-def task5(points,K,l):
-      """ Given a set P of n points in Rd, implement an algorithm that enu-
-      merates the simplexes of dimension at most k and filtration value at most l of
-      the α-complex and their filtration values.""" 
-
-      d=len(points[0])
-      enum = enum3(points,d)
-      #print(f"enum={enum}")
-      filtration_value=0
-      IsSimplex = {tuple([i]): 1 for i in range(len(points))}
-
-      simplex = {tuple([i]): Sphere(points[i], 0) for i in range(len(points))} #on initialise le premier simplexe
-
-      for i in range(1,K):
-        for j in range(len(enum[i-1])):
-              
-          current_simplex = enum[i][j]
-
-          for k in range(len(points)):
-                  
-            if k in current_simplex:
-              break
-                        
-            pn = current_simplex.append(k)
-
-            is_alpha, circum = Is_in_alpha_complex(points,[points[idx] for idx in current_simplex])
-
-            if not is_alpha:
-              IsSimplex[pn] = 0
-              break
-
+    #for all simplexes possible
+    for i in range(0, K):
+        for j in range(len(enum[i])):
+            #construction of the simplex
+            pn = tuple(enum[i][j])
+            simplex_tmp = [points[idx] for idx in pn]
+            
+            #check if the simplex is in the alpha complex
+            result, _ = Is_in_alpha_complex(points, simplex_tmp)
+            if not result:
+                continue
+            
+            #check if the simplex is already in the list
             if pn in simplex:
-              break
+                continue
 
-            new_simplex = [points[idx] for idx in current_simplex] + [points[k]]
+            #check if the number of points is greater than the dimension
+            if len(pn) > len(points[0])+1:
+                continue
+            
+            #compute the filtration value of the simplex
+            Circoncircle = make_sphere_n_points(simplex_tmp)
 
-            MEB = trivial(new_simplex)
-
-            if MEB.radius < l:
-              if MEB.radius > filtration_value:
-                        filtration_value=MEB.radius
-              simplex[pn] = MEB
-              IsSimplex[pn] = 1
+            #check if the filtration value is less than l
+            if Circoncircle.radius < l:
+                IsSimplex[pn] = 1
+                simplex[pn] = Circoncircle
+                if Circoncircle.radius > filtration_value:
+                    filtration_value = Circoncircle.radius
             else:
-              IsSimplex[pn] = 0
-              break
+                IsSimplex[pn] = 0
 
-            print(f"new alpha-simplex: {pn} -> {MEB.radius} ")
-      print(f"filtration value: {filtration_value}")
-      return None
+    return simplex, filtration_value, IsSimplex
 
 

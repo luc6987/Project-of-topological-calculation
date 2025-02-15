@@ -232,7 +232,7 @@ merates the simplexes of dimension at most k and filtration value at most l of
 the α-complex and their filtration values.""" 
       enum = enum3(points)
       #ca me parait très lourd de print enum
-      print(f"enum={enum}")
+      #print(f"enum={enum}")
       filtration_value=0
       IsSimplex = {tuple([i]): 1 for i in range(len(points))}
 

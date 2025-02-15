@@ -8,7 +8,8 @@ def measure_time(func, *args, **kwargs):
     return end_time - start_time, result
 
 def main():
-    starting_point = ...  # Define your starting point here
+    points=
+    starting_point = points,   # Define your starting point here
 
     time_task3, result_task3 = measure_time(task3, starting_point)
     time_task5, result_task5 = measure_time(task5, starting_point)

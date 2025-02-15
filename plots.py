@@ -6,12 +6,17 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 
-def plot_points_sphere(points, sphere, ax):
+def plot_points_sphere(points, sphere, ax, color_black=False):
     """Plot the points and the minimal enclosing sphere."""
     points = np.array(points)
     ax.scatter(points[:, 0], points[:, 1], label='Points')
+    if color_black:
+         col='b'
+    else:
+         col='r'
     
-    circle = plt.Circle(sphere.center[:2], sphere.radius, color='r', fill=False, label='Sphere')
+    
+    circle = plt.Circle(sphere.center[:2], sphere.radius, color=col, fill=False, label='Sphere')
     ax.add_artist(circle)
     
     ax.set_xlim(min(points[:, 0]) - sphere.radius - 1, max(points[:, 0]) + sphere.radius + 1)
@@ -159,6 +164,7 @@ import numpy as np
 import argparse
 from scipy.spatial import distance_matrix
 from itertools import combinations
+from scipy.spatial import Voronoi, voronoi_plot_2d
 
 #On se propose ici d'utiliser la bibliotheque sc.py pour ploter les complexes simpliciaux
 
@@ -201,8 +207,6 @@ def plot_cech_complex(simplex, points, radius):
         circle = plt.Circle(point, radius, color='skyblue', alpha=0.3)
         ax.add_patch(circle)
         
-
-
     combin = None
 
     while True:
@@ -237,18 +241,81 @@ def plot_cech_complex(simplex, points, radius):
     ax.set_aspect('equal', 'box')
     plt.show()
 
+
+def plot_alpha_complex(simplex, points,radius):
+    """Représente les simplexes de l'alpha complexe dans le plan"""
+
+    #prendre une copie du dictionnaire simplex:
+    simplex_copy = simplex.copy()
+
+    points = np.array(points)
+    
+    fig, ax = plt.subplots()
+    ax.scatter(points[:, 0], points[:, 1], label='Points')
+     # Draw circles around each point
+    vor = Voronoi(points)
+    voronoi_plot_2d(vor, ax=ax, show_vertices=False, line_colors='orange', line_width=2)
+        
+    combin = None
+
+    while True:
+        if not simplex_copy:
+            break
+        
+        combin, s = simplex_copy.popitem()
+        if combin == None or len(combin) > 3:
+            print("invalid combin value")
+            break
+
+        # Plot vertexes
+        if len(combin) == 1:
+            i = combin[0]
+            ax.plot(points[i][0], points[i][1], 'ro')
+
+        # Plot edges
+        if len(combin) == 2:
+            if len(combin) > 2:
+                break
+            i, j = combin
+            ax.plot([points[i, 0], points[j, 0]], [points[i, 1], points[j, 1]], 'b-')
+
+        # Plot triangles
+        if len(combin) == 3:
+            i, j, k = combin
+            triang = np.array([points[i], points[j], points[k]])
+            tri = plt.Polygon(triang, alpha=0.3, color='g')
+            ax.add_patch(tri)
+
+    ax.set_title('Cech Complex')
+    ax.set_aspect('equal', 'box')
+    plt.show()
+
+
    
 
 def test_plot_cech_complex_2d():
     points = [(np.random.randint(-10, 10), np.random.randint(-10, 10)) for _ in range(15)]
 
-        
-    
     #radius = 0.5
     l=3
 
     simplex = task3(points, l, printit=True)
     plot_cech_complex(simplex, points,l)
+
+def test_plot_alpha_complex_2d():
+    points = [(np.random.randint(-10, 10), np.random.randint(-10, 10)) for _ in range(15)]
+
+    #radius = 0.5
+    l=3
+
+    simplex = task3(points, l, printit=True)
+    plot_alpha_complex(simplex, points,l)
+
+def compare_cech_alpha(points,l,printit=False):
+    cech = task3(points, l, printit)
+    alpha = task5(points, l, printit)
+    plot_cech_complex(cech, points,l)
+    plot_alpha_complex(alpha, points,l)
 
 
 
@@ -266,4 +333,5 @@ if __name__ == "__main__":
     #test_circumsphere()
     #test_task4_plots()
     #test_plot_complexes()
-    test_plot_cech_complex_2d()
+    #test_plot_cech_complex_2d()
+    test_plot_alpha_complex_2d()

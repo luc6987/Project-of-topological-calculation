@@ -242,7 +242,7 @@ def plot_cech_complex(simplex, points, radius):
     plt.show()
 
 
-def plot_alpha_complex(simplex, points,radius):
+def plot_alpha_complex(simplex, points,l):
     """Représente les simplexes de l'alpha complexe dans le plan"""
 
     #prendre une copie du dictionnaire simplex:
@@ -285,6 +285,10 @@ def plot_alpha_complex(simplex, points,radius):
             triang = np.array([points[i], points[j], points[k]])
             tri = plt.Polygon(triang, alpha=0.3, color='g')
             ax.add_patch(tri)
+
+    for point in points:
+        circle = plt.Circle(point, l, color='skyblue', alpha=0.3)
+        ax.add_patch(circle)
 
     ax.set_title('Cech Complex')
     ax.set_aspect('equal', 'box')

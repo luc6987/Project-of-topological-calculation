@@ -200,7 +200,7 @@ if __name__ == "__main__":
     print("---------Question 4------------")
     #test_task4()
     print("---------Question 5------------")
-    #test_task5()
+    test_task5()
 
 
     print("---------Robustness checks------------")

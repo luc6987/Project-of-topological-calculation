@@ -403,8 +403,10 @@ def task5(points,K,l):
       """ Given a set P of n points in Rd, implement an algorithm that enu-
       merates the simplexes of dimension at most k and filtration value at most l of
       the α-complex and their filtration values.""" 
-      enum = enum3(points)
-      print(f"enum={enum}")
+
+      d=len(points[0])
+      enum = enum3(points,d)
+      #print(f"enum={enum}")
       filtration_value=0
       IsSimplex = {tuple([i]): 1 for i in range(len(points))}
 

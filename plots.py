@@ -83,8 +83,6 @@ def test_and_plot_minimal_enclosing_sphere_3d():
     test_cases = [
         [(0, 0, 0), (1, 1, 0), (1, 0, 1)],
         [(0, 0, 0), (1, 1, 0), (0, 1, 1), (1, 0, 1)],
-        [(0, 0, 0), (1, 3, 0), (0, 1, 1), (1, 0, 1), (1, 1, 1)],
-        [(0, 4, 0), (1, 1, 0), (0, 1, 1), (2, 0, 1), (1, 1, 1), (0, 0, 4)],
         [(0, 0, 0), (1, 1, 0), (0, 1, 1), (1, 0, 1), (1, 1, 1), (0, 0, 1), (1, 1, 2)]
     ]
     
@@ -99,11 +97,11 @@ def test_and_plot_minimal_enclosing_sphere_3d():
         for point in points:
             if sphere.contains(point):
                 if sphere.onradius(point):
-                    ax.scatter(point[0], point[1], point[2], color='g', label='On Sphere')
+                    ax.scatter(point[0], point[1], point[2], marker='^', color='g', label='On Sphere')
                 else:
-                    ax.scatter(point[0], point[1], point[2], color='b', label='Inside Sphere')
+                    ax.scatter(point[0], point[1], point[2], marker='o', color='b', label='Inside Sphere')
             else:
-                ax.scatter(point[0], point[1], point[2], color='r', label='Outside Sphere')
+                ax.scatter(point[0], point[1], point[2], marker='x', color='r', label='Outside Sphere')
     
     handles, labels = ax.get_legend_handles_labels()
     by_label = dict(zip(labels, handles))
@@ -237,7 +235,7 @@ def plot_cech_complex(simplex, points, radius):
             tri = plt.Polygon(triang, alpha=0.3, color='g')
             ax.add_patch(tri)
 
-    ax.set_title('Cech Complex')
+    ax.set_title(f"Czech complex for filtration {radius} and {len(points)} points")
     ax.set_aspect('equal', 'box')
     plt.show()
 
@@ -290,7 +288,7 @@ def plot_alpha_complex(simplex, points,l):
         circle = plt.Circle(point, l, color='skyblue', alpha=0.3)
         ax.add_patch(circle)
 
-    ax.set_title('Cech Complex')
+    ax.set_title(f"Alpha complex for filtration {l} and {len(points)} points")
     ax.set_aspect('equal', 'box')
     plt.show()
 
@@ -312,7 +310,7 @@ def test_plot_alpha_complex_2d():
     #radius = 0.5
     l=3
 
-    simplex = task3(points, l, printit=True)
+    simplex = task5(points, l, 2)
     plot_alpha_complex(simplex, points,l)
 
 
@@ -328,9 +326,9 @@ def test_plot_alpha_complex_2d():
 
 if __name__ == "__main__":
     test_and_plot_minimal_enclosing_sphere_2D()
-    test_and_plot_minimal_enclosing_sphere_3d()
-    test_circumsphere()
-    test_task4_plots()
-    test_plot_complexes()
-    test_plot_cech_complex_2d()
+    test_and_plot_minimal_enclosing_sphere_3d() #ajouter croix
+    #test_circumsphere()
+    #test_task4_plots()
+    #test_plot_complexes()
+    #test_plot_cech_complex_2d()
     test_plot_alpha_complex_2d()

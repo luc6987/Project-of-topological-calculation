@@ -57,11 +57,6 @@ def task3_extended(points,l, printit=False):
 
 
 
-class Simplex:
-    def __init__(self,points,sphere):
-        self.filtration=sphere.radius
-        self.points = points
-
 class Alpha_complex:
     def __init__(self,points,filtration):
         D=len(points[0]) #dimension
@@ -78,7 +73,7 @@ class Alpha_complex:
         self.neighbors = {i: [{j for j in np.argsort(dist[i]) if dist[i][j] <= 2 * filtration}]
 +[set() for j in range(3,D+2)] for i in range(n)} #structure: clé est l'indice du point, la valeur est une liste d'ensemble des points voisins dans le d-simplexe
         self.filtration_values = {(i):0 for i in range(n)} #On n'utilise pas ici l'objet Simplex pour éviter des problèmes de moficiations des ensembles via al fonction de hashage
-        
+        self.simplexes={(i):Sphere(points[i],0) for i in range(n)}
 
 
 def task5_extended(points,l, printit=False):
@@ -110,37 +105,55 @@ def task5_extended(points,l, printit=False):
 
                     break
             complex.filtration_values[(i_p,i_neighb)]=circum.radius #on ajoute la filtration value
+            complex.simplexes[(i_p,i_neighb)]=circum
+
             
             P = P[:-1] #On enlève le dernier point de P: il ne peut plus être contenu dans un autre circumcercle de i_p puisque c'était le plus loin
+    
+    #Here, we search the triangles
+    d=1
+    for i_p, point in enumerate(points):
+        P=complex.sorted_distances[i_p]
+        iteration_list = P.copy() #on prend une copie de P pour itérer sur P tout en le modifiant
+        for i_neighb in complex.neighbors[i_p][d-1]: #on itère sur les arêtes
+            for i_neighb2 in complex.neighbors[i_p][d-1]:
+                nouveau = False
+
+                if i_neighb2 == i_neighb:
+                    continue #on ne peut pas former un triangle avec soi-même
+                if i_neighb2 not in complex.neighbors[i_neighb][0]:
+                    continue #on ne peut pas former un triangle si les deux arêtes ne sont pas voisines
+                if (i_p,i_neighb2) in complex.neighbors[i_neighb][d]:
+                    continue #on ne peut pas former un triangle si on l'a déjà fait
+                if (i_p,i_neighb) in complex.neighbors[i_neighb2][d]:
+                    continue
+
+
+                simp = [point,points[i_neighb],points[i_neighb2]]
+                circum=make_sphere_n_points(simp)
+
+                condition_simplex = True
+
+                for i_insider in P: #on prend les voisins potentiels en partant du plus proche car il a le plus de chances d'être embêtant
+                    insider = points[i_insider]
+                    if circum.contains_strict(insider):
+                        condition_simplex = False
+                if condition_simplex:
+                    complex.neighbors[i_p][d].add((i_neighb,i_neighb2))
+                    complex.neighbors[i_neighb][d].add((i_p,i_neighb))
+                    complex.neighbors[i_neighb2][d].add((i_p,i_neighb))
+                    complex.filtration_values[(i_p,i_neighb,i_neighb2)]=circum.radius
+                    complex.simplexes[(i_p,i_neighb,i_neighb2)]=circum
 
     if printit:
         print(complex.neighbors)
     
-    simplex = {(i,neighbor):Sphere((0,0),complex.filtration_values[(i,neighbor)]) for i in range(len(points)) for neighbor in complex.neighbors[i][0]}
     plot_alpha_complex(simplex,points,l)
 
+    return simplex 
 
 
 
-class Vcell:
-    def __init__(self, center, radius):
-        self.center = np.array(center)
-        self.hyperpl=None # matrice des hyperplans
-        self.radius = radius
-
-
-def plot_voronoi(points):
-    "plot voronoi cells. Tries to do it efficiently"
-
-    d=len(points[0])
-    enum = enum3(points,d)
-    IsSimplex = {tuple([i]): 1 for i in range(len(points))}
-
-    dist = distance_matrix(points, points)
-    #récupérer une matrice avec les points dans l'ordre de distance
-    #créer une classe de voronoi cell ? 
-
-    simplex = {tuple([i]): Sphere(points[i], 0) for i in range(len(points))} #on initialise le premier simplexe
 
 
 

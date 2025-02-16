@@ -232,7 +232,7 @@ def enum5(points):
     return [[list(comb) for comb in combinations(range(n), k)] for k in range(2, len(points[0]) + 2)]
   
 
-def task5(points, K, l):
+def task5(points, l,K):
     """ Given a set P of n points in Rd, implement an algorithm that enumerates the simplexes of dimension at most k and filtration value at most l of the α-complex and their filtration values.""" 
     #input: points: list of tuples,the points in Rd
     # K: int, the maximal dimension of the simplexes
@@ -241,14 +241,14 @@ def task5(points, K, l):
     #output: simplex: dict, the simplexes of dimension at most k and filtration value at most l of the α-complex and their filtration values
     # filtration_value: float, the maximal filtration value
     # IsSimplex: dict, the simplexes of dimension at most k and filtration value at most l of the α-complex and their filtration values
-    
+
     enum = enum5(points)
     filtration_value = 0
     IsSimplex = {}
     simplex = {}  # on initialise le premier simplexe
 
     #for all simplexes possible
-    for i in range(0, K):
+    for i in range(K):
         for j in range(len(enum[i])):
             #construction of the simplex
             pn = tuple(enum[i][j])

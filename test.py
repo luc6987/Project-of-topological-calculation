@@ -2,6 +2,8 @@ from Tasks import *
 from plots import *
 import numpy as np
 import random
+import time
+import pandas as pd
 import matplotlib.pyplot as plt
 
 # Test cases
@@ -253,19 +255,32 @@ def test_task4():
         print(f"{R} is not in the  alpha-complex")
 
 
-def test_task5():
+def test_task5_random(in2D = False):
     #generate random n points in R^d:
     n=random.randint(5,10)
-    print(f"n={n}")
     d=random.randint(2,5)
+
+    k=random.randint(2,d)
+    if in2D:
+        d=2
+        k=2
+
+    print(f"n={n}")
     print(f"d={d}")
+    print(f"k={k}")
+
+
     points=[tuple(np.random.rand(d)) for i in range(n)]
     print(f"Points: {points}")
-    k=random.randint(2,d)
-    print(f"k={k}")
     l=np.random.rand(1)
     print(f"l={l}")
-    task5(points,k,l)
+    simplex,_,_ = task5(points,k,l)
+    if in2D:
+        plot_alpha_complex(simplex,points,l)
+
+
+
+
 
 
 def test_4d_task2():
@@ -326,27 +341,90 @@ def test_4D_MEB():
             print(f"Point {point} is outside the sphere")
 
 
+def test_compare_efficiency():
+    # Generate random points and filtration value
+
+    results = []
+    l=1/3
+
+    for n in range(5, 20, 5):  # Increasing sample size n
+        for d in range(2, 5):  # Increasing dimension d
+            points = [tuple(np.random.rand(d)) for _ in range(n)]
+
+            # Measure time for task3
+            start_time = time.time()
+            task3(points, l)
+            task3_time = time.time() - start_time
+
+            # Measure time for task5
+            start_time = time.time()
+            task5(points, d, l)
+            task5_time = time.time() - start_time
+
+            results.append({
+                'Sample Size (n)': n,
+                'Dimension (d)': d,
+                'Function': 'task3',
+                'Time (seconds)': task3_time
+            })
+            results.append({
+                'Sample Size (n)': n,
+                'Dimension (d)': d,
+                'Function': 'task5',
+                'Time (seconds)': task5_time
+            })
+
+    # Print results in a table
+    results_df = pd.DataFrame(results)
+    print(results_df.to_markdown(index=False))
+
+    # Plot the evolution of computing time for task3 and task5
+
+    plt.figure(figsize=(14, 8))
+    for function in results_df['Function'].unique():
+        for dimension in results_df['Dimension (d)'].unique():
+            subset = results_df[(results_df['Function'] == function) & (results_df['Dimension (d)'] == dimension)]
+            plt.plot(subset['Sample Size (n)'], subset['Time (seconds)'], marker='o', label=f'{function} (d={dimension})')
+    plt.title('Evolution of Computing Time for task3 and task5')
+    plt.xlabel('Sample Size (n)')
+    plt.ylabel('Time (seconds)')
+    plt.legend(title='Function and Dimension')
+    plt.grid(True)
+    plt.show()
+
+
+def test_compare_plots():
+    cech = task3(points, l)
+    alpha = task5(points, l)
+    plot_cech_complex(cech, points,l)
+    plot_alpha_complex(alpha, points,l)
+
+
 
 
 
 
 if __name__ == "__main__":
 
-    print("---------Question 1------------")
-    test_task1()
-    print("---------Question 2------------")
-    test_task2()
-    print("---------Question 3------------")
-    test_task3()
-    test_task3_simple()
+    # print("---------Question 1------------")
+    # test_task1()
+    # print("---------Question 2------------")
+    # test_task2()
+    # print("---------Question 3------------")
+    # test_task3()
+    # test_task3_simple()
 
-    print("---------Question 4------------")
-    test_task4()
-    print("---------Question 5------------")
-    test_task5()
+    # print("---------Question 4------------")
+    # test_task4()
+    # print("---------Question 5------------")
+    # test_task5_random(in2D = True)
 
 
-    print("---------Robustness checks------------")
-    test_4d_task2()
-    test_4D_MEB()
+
+    # print("---------Robustness checks------------")
+    # test_4d_task2()
+    # test_4D_MEB()
+
+    print("---------Efficiency comparison------------")
+    test_compare_efficiency()
 

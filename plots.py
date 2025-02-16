@@ -315,11 +315,6 @@ def test_plot_alpha_complex_2d():
     simplex = task3(points, l, printit=True)
     plot_alpha_complex(simplex, points,l)
 
-def compare_cech_alpha(points,l,printit=False):
-    cech = task3(points, l, printit)
-    alpha = task5(points, l, printit)
-    plot_cech_complex(cech, points,l)
-    plot_alpha_complex(alpha, points,l)
 
 
 
@@ -332,10 +327,10 @@ def compare_cech_alpha(points,l,printit=False):
 
 
 if __name__ == "__main__":
-    #test_and_plot_minimal_enclosing_sphere_2D()
-    #test_and_plot_minimal_enclosing_sphere_3d()
-    #test_circumsphere()
-    #test_task4_plots()
-    #test_plot_complexes()
-    #test_plot_cech_complex_2d()
+    test_and_plot_minimal_enclosing_sphere_2D()
+    test_and_plot_minimal_enclosing_sphere_3d()
+    test_circumsphere()
+    test_task4_plots()
+    test_plot_complexes()
+    test_plot_cech_complex_2d()
     test_plot_alpha_complex_2d()

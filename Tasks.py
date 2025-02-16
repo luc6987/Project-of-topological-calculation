@@ -142,7 +142,7 @@ def enum3(points,d):
   
  
 
-def task3(points, l, printit=False):
+def task3(points, l,k=None, printit=False):
     #input: points: list of tuples, the points in Rd
     # l: float, the maximal radius of the sphere
     # printit: bool, print the result or not
@@ -150,7 +150,9 @@ def task3(points, l, printit=False):
     #output: simplex: dict, the simplexes of dimension at most d and filtration value at most l
 
     d = len(points[0])
-    enum = enum3(points, d)
+    if k==None:
+        k=d #SI non spécifiée, on prend la dimension maximale possible des simplexes
+    enum = enum3(points, k)
     simplex = {tuple([i]): Sphere(points[i], 0) for i in range(len(points))}
 
     for i in range(1, len(enum)):
@@ -277,6 +279,6 @@ def task5(points, K, l):
             else:
                 IsSimplex[pn] = 0
 
-    return simplex, filtration_value, IsSimplex
+    return simplex
 
 

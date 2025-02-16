@@ -294,13 +294,16 @@ def test_compare_plots():
 
 if __name__ == "__main__":
 
-    # print("---------Question 1------------")
-    # test_task1()
-    # print("---------Question 2------------")
-    # test_task2()
-    # print("---------Question 3------------")
-    # test_task3()
-    # test_task3_simple()
+<<<<<<< HEAD
+    print("---------Question 1------------")
+    test_task1()
+    test_circumcenter_alpha()
+    print("---------Question 2------------")
+    test_task2()
+    print("---------Question 3------------")
+    test_task3()
+    test_task3_simple()
+
 
     # print("---------Question 4------------")
     # test_task4()

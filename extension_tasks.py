@@ -15,9 +15,11 @@ def task3_extended(points,l, printit=False):
 
     simplex = {tuple([i]): Sphere(points[i], 0) for i in range(len(points))} #on initialise le premier simplexe
 
-    
+    #On commence par le premier simplexe
     for i in range(1,len(enum)):
+        #On itère sur les simplexes de dimension i
         for j in range(len(enum[i-1])):
+            #On itère sur les points
             current_simplex = enum[i-1][j]
             
             for k in range(len(points)):

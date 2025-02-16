@@ -3,5 +3,21 @@ A repository for the project of CSC_42021_EP - Conception et analyse d'algorithm
 
 Matias Ollu, Yuguang Yao
 
-# Abstact
-This resipotary aims to present our result to solve the problem of the project of topological data analysis in CSC_42021_EP - Conception et analyse d'algorithmes (2024-2025) of the École Polytechnique. We present an alogritme to compute the simplexes and the filtration value of a given $\alpha$-complex or Čech-complex of a arbitary point-set. We devolepped an alogritme general enough to calculate the circumcircle of $n$ points in $d$-dimension euclidean space.
+Here are the documents you can find and its purposes:
+
+## Tasks.py
+this file contains the most essentials algoritm of our project containing 
+
+* Circumcircle of $n$ Points in $\mathbb{R}^d$ ($n \leq d+1$)
+* Minimal Enclosing Ball(MEB)
+* task3 Enumeration of Čech-complex
+* task5 Enumeration of alpha-complex and its filtration values
+
+# test.py
+This file contains the essential test to answer the request in the demands.
+
+# plots.py
+This file contains a basic framework to plot and the fonctions to plot the output in Tasks.
+
+# extension_tasks.py
+This file contains a expends mathode to resolve task3 and task5, but lack of test and adjust under cases of higher dimension.

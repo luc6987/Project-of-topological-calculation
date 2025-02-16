@@ -296,7 +296,7 @@ def plot_alpha_complex(simplex, points,l):
    
 
 def test_plot_cech_complex_2d():
-    points = [(np.random.randint(-10, 10), np.random.randint(-10, 10)) for _ in range(15)]
+    points = [(np.random.randint(-10, 10), np.random.randint(-10, 10)) for _ in range(50)]
 
     #radius = 0.5
     l=3
@@ -305,7 +305,7 @@ def test_plot_cech_complex_2d():
     plot_cech_complex(simplex, points,l)
 
 def test_plot_alpha_complex_2d():
-    points = [(np.random.randint(-10, 10), np.random.randint(-10, 10)) for _ in range(15)]
+    points = [(np.random.randint(-10, 10), np.random.randint(-10, 10)) for _ in range(50)]
 
     #radius = 0.5
     l=3
